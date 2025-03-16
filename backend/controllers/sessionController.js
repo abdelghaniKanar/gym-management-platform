@@ -113,10 +113,89 @@ const deleteSession = async (req, res) => {
   }
 };
 
+// Book a training session
+// Route:  POST /api/sessions/:id/book
+// Access Member only
+const bookSession = async (req, res) => {
+  try {
+    const session = await Session.findById(req.params.id);
+
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    // Ensure session isn't full
+    if (session.bookedMembers.length >= session.maxCapacity) {
+      return res.status(400).json({ message: "Session is full" });
+    }
+
+    // Ensure member isn't already booked
+    if (session.bookedMembers.includes(req.user.id)) {
+      return res
+        .status(400)
+        .json({ message: "You have already booked this session" });
+    }
+
+    // Add member to bookedMembers list
+    session.bookedMembers.push(req.user.id);
+    await session.save();
+
+    res.status(200).json({ message: "Booking successful", session });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Get all sessions booked by the logged-in member
+// Route:  GET /api/sessions/booked
+// Access Member only
+const getBookedSessions = async (req, res) => {
+  try {
+    const bookedSessions = await Session.find({
+      bookedMembers: req.user.id,
+    }).populate("trainer", "name");
+
+    res.status(200).json(bookedSessions);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+// Cancel a session booking
+// Route:  DELETE /api/sessions/:id/cancel
+// Access Member only
+const cancelBooking = async (req, res) => {
+  try {
+    const session = await Session.findById(req.params.id);
+
+    if (!session) {
+      return res.status(404).json({ message: "Session not found" });
+    }
+
+    // Remove member from bookedMembers list
+    session.bookedMembers = session.bookedMembers.filter(
+      (memberId) => memberId.toString() !== req.user.id
+    );
+
+    await session.save();
+    res
+      .status(200)
+      .json({ message: "Booking cancelled successfully", session });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
 module.exports = {
   createSession,
   getAllSessions,
   getSessionById,
   updateSession,
   deleteSession,
+  bookSession,
+  getBookedSessions,
+  cancelBooking,
 };
