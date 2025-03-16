@@ -1,19 +1,34 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import MemberDashboard from "./pages/MemberDashboard";
 import TrainerDashboard from "./pages/TrainerDashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/member/dashboard" element={<MemberDashboard />} />
-        <Route path="/trainer/dashboard" element={<TrainerDashboard />} />
-      </Routes>
-    </Router>
+    <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+
+      {/* Protected Routes */}
+      <Route
+        path="/member/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["member"]}>
+            <MemberDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/trainer/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["trainer"]}>
+            <TrainerDashboard />
+          </ProtectedRoute>
+        }
+      />
+    </Routes>
   );
 }
 

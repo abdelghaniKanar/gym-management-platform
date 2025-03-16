@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useState, useContext } from "react";
+import { Link } from "react-router-dom";
 import axios from "axios";
+import AuthContext from "../context/AuthContext";
 
 function Login() {
   const {
@@ -9,8 +10,8 @@ function Login() {
     handleSubmit,
     formState: { errors },
   } = useForm();
+  const { login } = useContext(AuthContext);
   const [errorMessage, setErrorMessage] = useState("");
-  const navigate = useNavigate();
 
   const onSubmit = async (data) => {
     try {
@@ -18,12 +19,7 @@ function Login() {
         "http://localhost:5000/api/auth/login",
         data
       );
-      localStorage.setItem("token", response.data.token);
-      navigate(
-        response.data.user.role === "trainer"
-          ? "/trainer/dashboard"
-          : "/member/dashboard"
-      );
+      login(response.data.user, response.data.token);
     } catch (error) {
       setErrorMessage(error.response?.data?.message || "Login failed");
     }
@@ -31,7 +27,7 @@ function Login() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white shadow-lg rounded-lg">
+      <div className="w-full max-w-md p-8 bg-white shadow-lg rounded-lg">
         <h2 className="text-2xl font-bold text-center text-gray-900">Login</h2>
 
         {errorMessage && (
@@ -39,31 +35,25 @@ function Login() {
         )}
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div>
-            <label className="block text-gray-700">Email</label>
-            <input
-              {...register("email", { required: "Email is required" })}
-              type="email"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your email"
-            />
-            {errors.email && (
-              <p className="text-red-500">{errors.email.message}</p>
-            )}
-          </div>
+          <input
+            {...register("email", { required: "Email is required" })}
+            type="email"
+            placeholder="Email"
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+          {errors.email && (
+            <p className="text-red-500">{errors.email.message}</p>
+          )}
 
-          <div>
-            <label className="block text-gray-700">Password</label>
-            <input
-              {...register("password", { required: "Password is required" })}
-              type="password"
-              className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
-              placeholder="Enter your password"
-            />
-            {errors.password && (
-              <p className="text-red-500">{errors.password.message}</p>
-            )}
-          </div>
+          <input
+            {...register("password", { required: "Password is required" })}
+            type="password"
+            placeholder="Password"
+            className="w-full px-4 py-2 border rounded-lg"
+          />
+          {errors.password && (
+            <p className="text-red-500">{errors.password.message}</p>
+          )}
 
           <button
             type="submit"
