@@ -1,22 +1,17 @@
-// Import necessary modules
 const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 
-// Load environment variables from .env file
 dotenv.config();
-
-// Connect to MongoDB
 connectDB();
 
-// Initialize Express app
 const app = express();
+app.use(express.json()); // Enable JSON parsing
 
-// Test
-app.get("/", (req, res) => {
-  res.send("Gym Management API is Running...");
-});
+// Routes
 
-// Define PORT
+// Auth
+app.use("/api/auth", require("./routes/authRoutes"));
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
