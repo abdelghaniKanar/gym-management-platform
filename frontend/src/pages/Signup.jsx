@@ -16,7 +16,7 @@ function Signup() {
   const onSubmit = async (data) => {
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/auth/signup",
+        "http://127.0.0.1:5000/api/auth/signup",
         data
       );
       login(response.data.user, response.data.token); // Use login from AuthContext
